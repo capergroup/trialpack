@@ -1,0 +1,27 @@
+<trials>
+  <!-- define trails here -->
+</trail>
+
+<!-- eaxmple:
+<trials>
+  <trial>
+    <description>Read string contents of a file.</description>
+    <draftProgramPath>FileReaderDraft.java</draftProgramPath>
+    <holes>
+      <hole id="1">
+        <evidence type="keywords">read file to a string</evidence>
+      </hole>
+    </holes>
+  </trial>
+  <trial>
+    <description>Read string contents of a file.</description>
+    <draftProgramPath>FileReaderDraft.java</draftProgramPath>
+    <holes>
+      <hole id="1">
+        <evidence type="call">readLine</evidence>
+        <evidence type="type">FileReader</evidence>
+      </hole>
+    </holes>
+  </trial>
+</trials>
+-->
