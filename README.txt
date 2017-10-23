@@ -1,5 +1,5 @@
 ===========================================
-Steps to complete this triallpack template:
+Steps to complete this trialpack template:
 ===========================================
 
 0.) Ensure you have dependencies JDK (1.5 or later) and Maven (3.3.9 or later).
