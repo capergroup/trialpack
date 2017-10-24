@@ -29,24 +29,24 @@ import java.util.*;
 public class ContextCheckerTest
 {
     @Test
-	public void checkValidTrailsXml()
+    public void checkValidTrailsXml()
     {
         /*
          * Get the byte contents of src/test/resources/trails.xml.
          */
-		byte[] trailsXmlBytes;
-		try
-		{
+        byte[] trailsXmlBytes;
+        try
+        {
             trailsXmlBytes = ResourceProvider.getResource("trials.xml");
-		}
-		catch(Exception e)
-		{
-			throw new RuntimeException("Could not access src/test/resources/trails.xml");
-		}
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("Could not access src/test/resources/trails.xml");
+        }
 
-		/*
-		 * Parse the trails xml bytes into a document.
-		 */
+        /*
+         * Parse the trails xml bytes into a document.
+         */
         Document doc;
         {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -65,7 +65,7 @@ public class ContextCheckerTest
             {
                 doc = dBuilder.parse(new ByteArrayInputStream(trailsXmlBytes));
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw new RuntimeException(e.getMessage());
             }
@@ -77,42 +77,41 @@ public class ContextCheckerTest
         /*
          * Extract the trails element.
          */
-		Element trialsElement;
-		{
+        Element trialsElement;
+        {
+            final String TRIALS = "trials";
+            NodeList list = doc.getElementsByTagName(TRIALS);
 
-			final String TRIALS = "trials";
-			NodeList list = doc.getElementsByTagName(TRIALS);
+            if (list.getLength() < 1)
+                throw new RuntimeException("No " + TRIALS + " element found.");
 
-			if (list.getLength() < 1)
-				throw new RuntimeException("No " + TRIALS + " element found.");
-
-			if(list.getLength() > 1)
+            if (list.getLength() > 1)
                 throw new RuntimeException("Multiple " + TRIALS + " elements found.");
 
             trialsElement = (Element) list.item(0);
-		}
+        }
 
-		/*
-		 * Check trails only composed of trail elements.
-		 */
+        /*
+         * Check trails only composed of trail elements.
+         */
         assertChildrenOnlyNamed(trialsElement, "trial");
 
-		/*
-		 * Extract the list of trail elements that are children of trials.
-		 */
+        /*
+         * Extract the list of trail elements that are children of trials.
+         */
         NodeList trialList;
         {
             final String TRIAL = "trial";
             trialList = trialsElement.getElementsByTagName(TRIAL);
 
-            if(trialList.getLength() < 1)
+            if (trialList.getLength() < 1)
                 throw new RuntimeException("No " + TRIAL + " elements found.");
         }
 
         /*
          * Check each trial.
          */
-		for (int i=0; i<trialList.getLength(); i++)
+        for (int i = 0; i < trialList.getLength(); i++)
         {
             Element trialElement = (Element) trialList.item(i);
 
@@ -131,22 +130,22 @@ public class ContextCheckerTest
              */
             checkTrailExcludingEvidence(trialElement, i, draftProgramSource);
 
-           /*
-		    * Check all evidence elements of trail.
-		    */
+            /*
+             * Check all evidence elements of trail.
+             */
             checkTrailEvidence(trialElement, i);
         }
 
-	}
+    }
 
     /*
      * Check all evidence elements of trail.
      */
-	private void checkTrailEvidence(Element trialElement, int trailElementIndex)
+    private void checkTrailEvidence(Element trialElement, int trailElementIndex)
     {
         NodeList holeList = getHoleListFromTrailElement(trialElement);
 
-        for (int j=0; j<holeList.getLength(); j++)
+        for (int j = 0; j < holeList.getLength(); j++)
         {
             Element hole = (Element) holeList.item(j);
             NodeList evidenceList = hole.getElementsByTagName("evidence");
@@ -163,9 +162,9 @@ public class ContextCheckerTest
                 String type = evidence.getAttribute(TYPE);
 
                 if (type == null)
-                {
+                 {
                     throw new RuntimeException("Missing " + TYPE + " attribute for evidence " + (k + 1) + " of hole " +
-                                               (j + 1) + " of trail " + (trailElementIndex + 1) + ".");
+                        (j + 1) + " of trail " + (trailElementIndex + 1) + ".");
                 }
 
                 /*
@@ -174,7 +173,7 @@ public class ContextCheckerTest
                 if (!type.equals("keywords") && !type.equals("call") && !type.equals("type") && !type.equals("context"))
                 {
                     throw new RuntimeException("Unknown type " + type + "for evidence " + (k + 1) + " of hole " +
-                                               (j + 1) + " of trail " + (trailElementIndex + 1) + ".");
+                        (j + 1) + " of trail " + (trailElementIndex + 1) + ".");
                 }
             }
         }
@@ -183,11 +182,11 @@ public class ContextCheckerTest
     /*
      * Check the validity of the hole entries of each trail (excluding checking evidence parts).
      */
-	private void checkTrailExcludingEvidence(Element trialElement, int trailElementIndex, String draftProgramSource)
+    private void checkTrailExcludingEvidence(Element trialElement, int trailElementIndex, String draftProgramSource)
     {
         NodeList holeList = getHoleListFromTrailElement(trialElement);
 
-        Set<String> seenHoleIds = new HashSet<String>(); // track seen to ensure no duplicates
+        Set < String > seenHoleIds = new HashSet < String > (); // track seen to ensure no duplicates
         for (int j = 0; j < holeList.getLength(); j++)
         {
             Element hole = (Element) holeList.item(j);
@@ -200,16 +199,15 @@ public class ContextCheckerTest
             {
                 id = hole.getAttribute("id");
 
-                if (id == null)
-                {
+                if (id == null) {
                     throw new RuntimeException("Missing id attirbute for hole " + (j + 1) + " of trail " +
-                            (trailElementIndex + 1) + ".");
+                        (trailElementIndex + 1) + ".");
                 }
 
                 if (seenHoleIds.contains(id))
                 {
                     throw new RuntimeException("Duplicate id attirbute for hole " + (j + 1) + " of trail " +
-                            (trailElementIndex + 1) + ".");
+                        (trailElementIndex + 1) + ".");
                 }
             }
 
@@ -221,7 +219,7 @@ public class ContextCheckerTest
             if (!draftProgramSource.contains("/// " + id))
             {
                 throw new RuntimeException("Draft program does not contain id " + id + " for hole " + (j + 1) +
-                        " of trail " + (trailElementIndex + 1) + ".");
+                    " of trail " + (trailElementIndex + 1) + ".");
             }
 
             /*
@@ -230,15 +228,17 @@ public class ContextCheckerTest
             NodeList evidenceList = hole.getElementsByTagName("evidence");
 
             if (evidenceList.getLength() < 1)
+            {
                 throw new RuntimeException("Missing evidence for hole " + (j + 1) + " of trail " +
-                                           (trailElementIndex + 1) + ".");
+                    (trailElementIndex + 1) + ".");
+            }
         }
     }
 
     /*
      * Check the existance/validity of the draftProgramPath entry of the trial.
      */
-	private String checkPassProgramPath(Element trialElement, int trailElementIndex)
+    private String checkPassProgramPath(Element trialElement, int trailElementIndex)
     {
         /*
          * Get the value of the draftProgramPath element.
@@ -262,8 +262,7 @@ public class ContextCheckerTest
         {
             byte[] draftProgramBytes = ResourceProvider.getResource(draftProgramPath);
             draftProgramSource = new String(draftProgramBytes);
-        }
-        catch (IOException e)
+        } catch (IOException e)
         {
             throw new RuntimeException("Could not read resource " + draftProgramPath);
         }
@@ -274,7 +273,7 @@ public class ContextCheckerTest
     /*
      * Return the (possibly empty) list of holes for the trial.
      */
-	private NodeList getHoleListFromTrailElement(Element trialElement)
+    private NodeList getHoleListFromTrailElement(Element trialElement)
     {
         final String HOLES = "holes";
         NodeList holesList = trialElement.getElementsByTagName(HOLES);
@@ -292,18 +291,18 @@ public class ContextCheckerTest
      * Assert that every child element of the given element has one of the given names.
      */
     private void assertChildrenOnlyNamed(Element element, String...names)
-    {
-        HashSet<String> allowedNames = new HashSet<String>(Arrays.asList(names));
+     {
+        HashSet < String > allowedNames = new HashSet < String > (Arrays.asList(names));
 
         NodeList children = element.getChildNodes();
 
-        for(int i = 0; i<children.getLength(); i++)
-        {
+        for (int i = 0; i < children.getLength(); i++)
+         {
             Node child = children.item(i);
-            if(!(child instanceof Element))
+            if (!(child instanceof Element))
                 continue;
 
-            if(!allowedNames.contains(child.getNodeName()))
+            if (!allowedNames.contains(child.getNodeName()))
                 throw new RuntimeException("Unexpected element " + child.getNodeName());
 
         }
@@ -312,20 +311,20 @@ public class ContextCheckerTest
     /*
      * Get the text contents of the unique child element of the given parent element.
      */
-	private String getSingleChildElementTextContent(Element parentElement, String childElementName)
-	{
-		NodeList list = parentElement.getElementsByTagName(childElementName);
-		if(list.getLength() < 1)
-		{
-			return null;
-		}
-		else if(list.getLength() == 1)
-		{
-			return list.item(0).getTextContent();
-		}
-		else
-		{
-			throw new IllegalArgumentException("Multiple " + childElementName + " elements found");
-		}
-	}
+    private String getSingleChildElementTextContent(Element parentElement, String childElementName)
+    {
+        NodeList list = parentElement.getElementsByTagName(childElementName);
+        if (list.getLength() < 1)
+        {
+            return null;
+        }
+        else if (list.getLength() == 1)
+        {
+            return list.item(0).getTextContent();
+        }
+        else
+        {
+            throw new IllegalArgumentException("Multiple " + childElementName + " elements found");
+        }
+    }
 }
