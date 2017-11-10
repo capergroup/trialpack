@@ -13,10 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 import org.junit.*;
+
 import javax.xml.parsers.*;
+
 import org.w3c.dom.*;
 import org.xml.sax.*;
+
 import java.io.*;
 import java.util.*;
 
@@ -38,8 +42,7 @@ public class ContextCheckerTest
         try
         {
             trailsXmlBytes = ResourceProvider.getResource("trials.xml");
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             throw new RuntimeException("Could not access src/test/resources/trails.xml");
         }
@@ -55,8 +58,7 @@ public class ContextCheckerTest
             try
             {
                 dBuilder = dbFactory.newDocumentBuilder();
-            }
-            catch (ParserConfigurationException e)
+            } catch (ParserConfigurationException e)
             {
                 throw new RuntimeException("Could not init parsing environment.");
             }
@@ -64,8 +66,7 @@ public class ContextCheckerTest
             try
             {
                 doc = dBuilder.parse(new ByteArrayInputStream(trailsXmlBytes));
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new RuntimeException(e.getMessage());
             }
@@ -79,6 +80,7 @@ public class ContextCheckerTest
          */
         Element trialsElement;
         {
+
             final String TRIALS = "trials";
             NodeList list = doc.getElementsByTagName(TRIALS);
 
@@ -113,26 +115,47 @@ public class ContextCheckerTest
          */
         for (int i = 0; i < trialList.getLength(); i++)
         {
+
             Element trialElement = (Element) trialList.item(i);
+
+            String DRAFT_PROGRAM_PATH = "draftProgramPath";
+            String EXPECTED_SKETCH = "expectedSketch";
 
             /*
              * Check only expected children for trial.
              */
-            assertChildrenOnlyNamed(trialElement, "description", "draftProgramPath", "holes");
+            assertChildrenOnlyNamed(trialElement, "description", DRAFT_PROGRAM_PATH, "holes", EXPECTED_SKETCH);
 
             /*
-             * Check the existance/validity of the draftProgramPath entry of the trail.
+             * Check the existance of the draftProgramPath entry of the trail and fetch the contents of the file.
              */
-            String draftProgramSource = checkPassProgramPath(trialElement, i);
+            String draftProgramSource = getResourceFileSpecifiedByTrialChild(trialElement, i, DRAFT_PROGRAM_PATH);
+
+            /*
+             * If the trail has a expectedSketch element, ensure the identified resource file is present and can
+             * be read.
+             */
+            try
+            {
+                // Don't care about the value of the output at this point, just want to ensure the file is present
+                // and the contents can be read if the expectedSketch element is specified.
+                // If there is a probelm reading the file (e.g. doesn't exist) a RuntimeException will be generated
+                // by this call.
+                getResourceFileSpecifiedByTrialChild(trialElement, i, EXPECTED_SKETCH);
+            }
+            catch (NoSuchElementException e)
+            {
+                // ok if element is not present, not a mandatory element
+            }
 
             /*
              * Check the validity of the hole entries of each trail (excluding checking evidence parts which we do below).
              */
             checkTrailExcludingEvidence(trialElement, i, draftProgramSource);
 
-            /*
-             * Check all evidence elements of trail.
-             */
+           /*
+            * Check all evidence elements of trail.
+            */
             checkTrailEvidence(trialElement, i);
         }
 
@@ -162,9 +185,9 @@ public class ContextCheckerTest
                 String type = evidence.getAttribute(TYPE);
 
                 if (type == null)
-                 {
+                {
                     throw new RuntimeException("Missing " + TYPE + " attribute for evidence " + (k + 1) + " of hole " +
-                        (j + 1) + " of trail " + (trailElementIndex + 1) + ".");
+                            (j + 1) + " of trail " + (trailElementIndex + 1) + ".");
                 }
 
                 /*
@@ -173,7 +196,7 @@ public class ContextCheckerTest
                 if (!type.equals("keywords") && !type.equals("call") && !type.equals("type") && !type.equals("context"))
                 {
                     throw new RuntimeException("Unknown type " + type + "for evidence " + (k + 1) + " of hole " +
-                        (j + 1) + " of trail " + (trailElementIndex + 1) + ".");
+                            (j + 1) + " of trail " + (trailElementIndex + 1) + ".");
                 }
             }
         }
@@ -186,7 +209,7 @@ public class ContextCheckerTest
     {
         NodeList holeList = getHoleListFromTrailElement(trialElement);
 
-        Set < String > seenHoleIds = new HashSet < String > (); // track seen to ensure no duplicates
+        Set<String> seenHoleIds = new HashSet<String>(); // track seen to ensure no duplicates
         for (int j = 0; j < holeList.getLength(); j++)
         {
             Element hole = (Element) holeList.item(j);
@@ -199,15 +222,16 @@ public class ContextCheckerTest
             {
                 id = hole.getAttribute("id");
 
-                if (id == null) {
+                if (id == null)
+                {
                     throw new RuntimeException("Missing id attirbute for hole " + (j + 1) + " of trail " +
-                        (trailElementIndex + 1) + ".");
+                            (trailElementIndex + 1) + ".");
                 }
 
                 if (seenHoleIds.contains(id))
                 {
                     throw new RuntimeException("Duplicate id attirbute for hole " + (j + 1) + " of trail " +
-                        (trailElementIndex + 1) + ".");
+                            (trailElementIndex + 1) + ".");
                 }
             }
 
@@ -219,7 +243,7 @@ public class ContextCheckerTest
             if (!draftProgramSource.contains("/// " + id))
             {
                 throw new RuntimeException("Draft program does not contain id " + id + " for hole " + (j + 1) +
-                    " of trail " + (trailElementIndex + 1) + ".");
+                        " of trail " + (trailElementIndex + 1) + ".");
             }
 
             /*
@@ -228,46 +252,46 @@ public class ContextCheckerTest
             NodeList evidenceList = hole.getElementsByTagName("evidence");
 
             if (evidenceList.getLength() < 1)
-            {
                 throw new RuntimeException("Missing evidence for hole " + (j + 1) + " of trail " +
-                    (trailElementIndex + 1) + ".");
-            }
+                        (trailElementIndex + 1) + ".");
         }
     }
 
     /*
-     * Check the existance/validity of the draftProgramPath entry of the trial.
+     * Check the existance of the child element named childName of trailElement and return the string contents of
+     * file path specified by the child element's value (relative to the resources directory).
      */
-    private String checkPassProgramPath(Element trialElement, int trailElementIndex)
+    private String getResourceFileSpecifiedByTrialChild(Element trialElement, int trailElementIndex, String childName)
     {
         /*
-         * Get the value of the draftProgramPath element.
+         * Get the path entry of trailElement identified by child element childName.
          */
-        String draftProgramPath;
+        String path;
         {
-            final String DRAFT_PROGRAM_PATH = "draftProgramPath";
-            draftProgramPath = getSingleChildElementTextContent(trialElement, DRAFT_PROGRAM_PATH);
+            path = getSingleChildElementTextContent(trialElement, childName);
 
-            if (draftProgramPath == null)
+            if (path == null)
             {
-                throw new RuntimeException("Missing " + DRAFT_PROGRAM_PATH + " for trail " + (trailElementIndex + 1));
+                throw new NoSuchElementException("Missing " + childName + " for trail " + (trailElementIndex + 1));
             }
         }
 
         /*
-         * Read the string contents of the draft program path.
+         * Read the string contents of the path relative to the resources folder.
          */
-        String draftProgramSource;
+        String fileContents;
         try
         {
-            byte[] draftProgramBytes = ResourceProvider.getResource(draftProgramPath);
-            draftProgramSource = new String(draftProgramBytes);
-        } catch (IOException e)
+            byte[] fileContentsBytes = ResourceProvider.getResource(path);
+            fileContents = new String(fileContentsBytes);
+        }
+        catch (IOException e)
         {
-            throw new RuntimeException("Could not read resource " + draftProgramPath);
+            throw new RuntimeException("Could not read resource " + path);
         }
 
-        return draftProgramSource;
+        return fileContents;
+
     }
 
     /*
@@ -290,14 +314,14 @@ public class ContextCheckerTest
     /*
      * Assert that every child element of the given element has one of the given names.
      */
-    private void assertChildrenOnlyNamed(Element element, String...names)
-     {
-        HashSet < String > allowedNames = new HashSet < String > (Arrays.asList(names));
+    private void assertChildrenOnlyNamed(Element element, String... names)
+    {
+        HashSet<String> allowedNames = new HashSet<String>(Arrays.asList(names));
 
         NodeList children = element.getChildNodes();
 
         for (int i = 0; i < children.getLength(); i++)
-         {
+        {
             Node child = children.item(i);
             if (!(child instanceof Element))
                 continue;
@@ -317,12 +341,10 @@ public class ContextCheckerTest
         if (list.getLength() < 1)
         {
             return null;
-        }
-        else if (list.getLength() == 1)
+        } else if (list.getLength() == 1)
         {
             return list.item(0).getTextContent();
-        }
-        else
+        } else
         {
             throw new IllegalArgumentException("Multiple " + childElementName + " elements found");
         }
