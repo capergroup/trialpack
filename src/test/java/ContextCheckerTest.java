@@ -119,7 +119,7 @@ public class ContextCheckerTest
             Element trialElement = (Element) trialList.item(i);
 
             String DRAFT_PROGRAM_PATH = "draftProgramPath";
-            String EXPECTED_SKETCH = "expectedSketch";
+            String EXPECTED_SKETCH = "expectedSketchPath";
 
             /*
              * Check only expected children for trial.

@@ -16,6 +16,7 @@
   <trial>
     <description>Read string contents of a file.</description>
     <draftProgramPath>FileReaderDraft.java</draftProgramPath>
+    <expectedSketchPath>FileReadSketch.java</expectedSketchPath>
     <holes>
       <hole id="1">
         <evidence type="call">readLine</evidence>

@@ -6,17 +6,25 @@ Steps to complete this trialpack template:
 
 1.) Open src/test/java/TestSuite.java and:
 
-  1.a.) Define the methods to be evaluated by the testpack in
-        TestSuite.Testable.
+  1.a.) Select an appropriate return type for the makeTestable() method that 
+        matches the signature of the method in which you plan to 
+        synthesize code.
+
+        For example, if you plan to synthesize inside the body of:
+
+             public int countLines(String text) { ... }
+
+        set the return type of makeTestable to Function<String,Integer>.
 
   1.b.) Author one or more JUnit test cases in TestSuite that make use of
-        Testable.
+        the result of makeTestable().
 
-2.) Open src/test/java/PassProgram.java and implement the methods defined in
-    step 1.a.
+2.) Open src/test/java/PassProgram.java and implement the interface returned
+    by makeTestable() defined in step 1.a.  This implementation should pass
+    all test cases defined in TestSuite.java
 
 3.) Create any number of draft Java programs in src/test/resources that
-    implements TestSuite.Testable.
+    implement the same interface as PassProgram in step 2.
 
     3.a.) Leave any number of holes to be synthesized in each draft source file
           using "/// #" notation where each # is unique within a single file.
@@ -38,6 +46,6 @@ Steps to complete this trialpack template:
 
 5.) Save all files and execute:
 
-        $ mvn -q test clean
+        $ ./build
 
-    from the same directory as pom.xml to build the testpack jar file.
+    from the root directory to create the trial pack.
