@@ -11,7 +11,7 @@ public abstract class TestSuite
 	// Add here the test cases to execrise intances returned by makeTestable().
 	//
 
-        @Test
+        @Test(timeout=10000)
         public void Test1()
         {
              // BiFunction<Integer,Integer,Integer> adder = makeTestable();
